@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AlexProgrammerDE <40795980+AlexProgrammerDE@users.noreply.github.com>
+Date: Fri, 2 Oct 2020 19:00:50 +0200
+Subject: [PATCH] Add tps to gui
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java b/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
+index e463a86a6ad6c4f2885f4df159411bad294e1208..c3633c9806f5bfd1caae52636c275e1063e01f2a 100644
+--- a/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
++++ b/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
+@@ -58,9 +58,15 @@ public class RAMDetails extends JList<String> {
+     public void update() {
+         GraphData data = RAMGraph.DATA.peekLast();
+         Vector<String> vector = new Vector<>();
++
++        // Paper start - Add tps entry
++        double tps = Bukkit.getTPS()[0];
+         vector.add("Memory use: " + (data.getUsedMem() / 1024L / 1024L) + " mb (" + (data.getFree() * 100L / data.getMax()) + "% free)");
+         vector.add("Heap: " + (data.getTotal() / 1024L / 1024L) + " / " + (data.getMax() / 1024L / 1024L) + " mb");
+         vector.add("Avg tick: " + DECIMAL_FORMAT.format(getAverage(server.getTickTimes())) + " ms");
++        vector.add("TPS: " + ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 ));
++        // Paper end
++
+         setListData(vector);
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/GuiStatsComponent.java b/src/main/java/net/minecraft/server/GuiStatsComponent.java
+index 859e31c63f94bdc7729c6d475990750b76e24b9c..3c98a6feded87f93c0119e2d414779037f003c66 100644
+--- a/src/main/java/net/minecraft/server/GuiStatsComponent.java
++++ b/src/main/java/net/minecraft/server/GuiStatsComponent.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import org.bukkit.Bukkit;
++
+ import java.awt.Color;
+ import java.awt.Dimension;
+ import java.awt.Graphics;
+@@ -16,7 +18,7 @@ public class GuiStatsComponent extends JComponent {
+     });
+     private final int[] b = new int[256];
+     private int c;
+-    private final String[] d = new String[11];
++    private final String[] d = new String[12];
+     private final MinecraftServer e;
+     private final Timer f;
+ 
+@@ -35,8 +37,13 @@ public class GuiStatsComponent extends JComponent {
+     private void b() {
+         long i = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+ 
++        // Paper start - Add tps entry
++        double tps = Bukkit.getTPS()[0];
+         this.d[0] = "Memory use: " + i / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
+         this.d[1] = "Avg tick: " + GuiStatsComponent.a.format(this.a(this.e.h) * 1.0E-6D) + " ms";
++        this.d[2] = "TPS:" + ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 );
++        // Paper end
++
+         this.b[this.c++ & 255] = (int) (i * 100L / Runtime.getRuntime().maxMemory());
+         this.repaint();
+     }
